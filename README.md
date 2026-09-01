@@ -18,7 +18,7 @@ provider's official documentation before being trusted.
 2. **Score & map** (`modules/cvss_scorer.py`) : derives a CVSS v4.0 base
    vector per finding from its category (using the official FIRST.org
    macrovector tables via the `cvss` package) and computes severity.
-3. **Review & remediate (HITL)** — a human reviews and approves findings
+3. **Review & remediate (HITL)** : a human reviews and approves findings
    before scripts are generated for them.
 4. **Generate remediation script** (`modules/mapping_engine.py`) : matches
    each finding to the most specific applicable CLI template and populates
