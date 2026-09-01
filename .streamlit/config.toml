@@ -1,0 +1,7 @@
+# toolbarMode "minimal" removes the Deploy button and developer menu from
+# Streamlit's built-in header.
+[client]
+toolbarMode = "minimal"
+
+[browser]
+gatherUsageStats = false

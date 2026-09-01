@@ -1,0 +1,1404 @@
+{
+  "IAM|AWS|CRITICAL": {
+    "title": "Restrict Wildcard IAM Policy",
+    "description": "Removes overly permissive wildcard (*) actions and enforces least-privilege.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: List all locally-managed policies \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws iam list-policies --scope Local \\",
+      "  --query 'Policies[*].[PolicyName,Arn]' --output table",
+      "",
+      "# \u2500\u2500 Step 2: Retrieve current policy document \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws iam get-policy-version \\",
+      "  --policy-arn {{resource}} \\",
+      "  --version-id v1 --output json",
+      "",
+      "# \u2500\u2500 Step 3: Create restricted replacement policy \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "# Edit restricted-policy.json to remove all wildcard (*) Actions/Resources",
+      "aws iam create-policy-version \\",
+      "  --policy-arn {{resource}} \\",
+      "  --policy-document file://restricted-policy.json \\",
+      "  --set-as-default",
+      "",
+      "# \u2500\u2500 Step 4: Delete the old wildcard version \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws iam delete-policy-version \\",
+      "  --policy-arn {{resource}} \\",
+      "  --version-id v1",
+      "",
+      "# \u2500\u2500 Step 5: Enforce MFA for all users attached to this policy \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws iam list-entities-for-policy \\",
+      "  --policy-arn {{resource}} \\",
+      "  --entity-filter User --output table"
+    ]
+  },
+  "S3|AWS|HIGH": {
+    "title": "Block S3 Public Access & Enable Encryption",
+    "description": "Blocks all public access paths and enforces AES-256 server-side encryption.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Block all public access \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-public-access-block \\",
+      "  --bucket {{resource}} \\",
+      "  --public-access-block-configuration \\",
+      "  BlockPublicAcls=true,IgnorePublicAcls=true,\\",
+      "  BlockPublicPolicy=true,RestrictPublicBuckets=true",
+      "",
+      "# \u2500\u2500 Step 2: Enable AES-256 server-side encryption \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-encryption \\",
+      "  --bucket {{resource}} \\",
+      "  --server-side-encryption-configuration \\",
+      "  '{\"Rules\":[{\"ApplyServerSideEncryptionByDefault\":{\"SSEAlgorithm\":\"AES256\"}}]}'",
+      "",
+      "# \u2500\u2500 Step 3: Enable versioning \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-versioning \\",
+      "  --bucket {{resource}} \\",
+      "  --versioning-configuration Status=Enabled",
+      "",
+      "# \u2500\u2500 Step 4: Enable S3 access logging \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-logging \\",
+      "  --bucket {{resource}} \\",
+      "  --bucket-logging-status \\",
+      "  '{\"LoggingEnabled\":{\"TargetBucket\":\"{{AUDIT_LOG_BUCKET}}\",\"TargetPrefix\":\"s3-logs/\"}}'",
+      "",
+      "# \u2500\u2500 Step 5: Verify configuration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api get-bucket-encryption --bucket {{resource}}",
+      "aws s3api get-public-access-block --bucket {{resource}}"
+    ]
+  },
+  "S3|AWS|MEDIUM": {
+    "title": "Enable S3 Versioning & MFA Delete",
+    "description": "Activates versioning and MFA-protected delete to prevent accidental/malicious data loss.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Enable versioning \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-versioning \\",
+      "  --bucket {{resource}} \\",
+      "  --versioning-configuration Status=Enabled",
+      "",
+      "# \u2500\u2500 Step 2: Enable MFA Delete (requires root MFA device) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-versioning \\",
+      "  --bucket {{resource}} \\",
+      "  --mfa \"{{MFA_SERIAL}} {{MFA_TOKEN}}\" \\",
+      "  --versioning-configuration MFADelete=Enabled,Status=Enabled",
+      "",
+      "# \u2500\u2500 Step 3: Apply lifecycle policy to expire old versions \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws s3api put-bucket-lifecycle-configuration \\",
+      "  --bucket {{resource}} \\",
+      "  --lifecycle-configuration file://s3-lifecycle-policy.json"
+    ]
+  },
+  "EC2|AWS|HIGH": {
+    "title": "Restrict Security Group SSH Access",
+    "description": "Removes unrestricted 0.0.0.0/0 SSH ingress and restricts to a trusted CIDR.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Revoke unrestricted IPv4 SSH \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws ec2 revoke-security-group-ingress \\",
+      "  --group-id {{resource}} \\",
+      "  --protocol tcp --port 22 --cidr 0.0.0.0/0",
+      "",
+      "# \u2500\u2500 Step 2: Revoke unrestricted IPv6 SSH \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws ec2 revoke-security-group-ingress \\",
+      "  --group-id {{resource}} \\",
+      "  --protocol tcp --port 22 --ipv6-cidr ::/0",
+      "",
+      "# \u2500\u2500 Step 3: Authorise access from trusted CIDR only \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws ec2 authorize-security-group-ingress \\",
+      "  --group-id {{resource}} \\",
+      "  --protocol tcp --port 22 \\",
+      "  --cidr {{TRUSTED_IP}}/32",
+      "",
+      "# \u2500\u2500 Step 4: Verify final ruleset \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws ec2 describe-security-groups \\",
+      "  --group-ids {{resource}} \\",
+      "  --query 'SecurityGroups[*].IpPermissions'"
+    ]
+  },
+  "RDS|AWS|CRITICAL": {
+    "title": "Secure RDS Public Exposure",
+    "description": "Disables public accessibility, enables encryption, and activates deletion protection.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Disable public accessibility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws rds modify-db-instance \\",
+      "  --db-instance-identifier {{resource}} \\",
+      "  --no-publicly-accessible \\",
+      "  --apply-immediately",
+      "",
+      "# \u2500\u2500 Step 2: Snapshot before encryption migration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws rds create-db-snapshot \\",
+      "  --db-instance-identifier {{resource}} \\",
+      "  --db-snapshot-identifier {{resource}}-pre-encrypt-snapshot",
+      "",
+      "# \u2500\u2500 Step 3: Enable enhanced monitoring \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws rds modify-db-instance \\",
+      "  --db-instance-identifier {{resource}} \\",
+      "  --monitoring-interval 60 \\",
+      "  --monitoring-role-arn arn:aws:iam::{{ACCOUNT_ID}}:role/rds-monitoring-role",
+      "",
+      "# \u2500\u2500 Step 4: Enable deletion protection \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws rds modify-db-instance \\",
+      "  --db-instance-identifier {{resource}} \\",
+      "  --deletion-protection \\",
+      "  --apply-immediately",
+      "",
+      "# \u2500\u2500 Step 5: Rotate credentials via Secrets Manager \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws secretsmanager rotate-secret \\",
+      "  --secret-id rds/{{resource}}/credentials"
+    ]
+  },
+  "CloudTrail|AWS|HIGH": {
+    "title": "Enable CloudTrail Logging",
+    "description": "Creates and activates a multi-region CloudTrail with S3 delivery and log validation.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Create CloudTrail \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws cloudtrail create-trail \\",
+      "  --name {{resource}} \\",
+      "  --s3-bucket-name {{CLOUDTRAIL_BUCKET}} \\",
+      "  --is-multi-region-trail \\",
+      "  --enable-log-file-validation",
+      "",
+      "# \u2500\u2500 Step 2: Start logging \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws cloudtrail start-logging --name {{resource}}",
+      "",
+      "# \u2500\u2500 Step 3: Verify trail is active \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws cloudtrail get-trail-status --name {{resource}}"
+    ]
+  },
+  "KMS|AWS|MEDIUM": {
+    "title": "Enable KMS Key Rotation",
+    "description": "Activates automatic annual key rotation on the customer-managed KMS key.",
+    "provider": "AWS",
+    "commands": [
+      "# \u2500\u2500 Step 1: Enable automatic key rotation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws kms enable-key-rotation \\",
+      "  --key-id {{resource}}",
+      "",
+      "# \u2500\u2500 Step 2: Verify rotation status \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "aws kms get-key-rotation-status \\",
+      "  --key-id {{resource}}"
+    ]
+  },
+  "Storage|Azure|HIGH": {
+    "title": "Block Azure Blob Public Access",
+    "description": "Disables anonymous public access on the storage account and enables encryption.",
+    "provider": "Azure",
+    "commands": [
+      "# \u2500\u2500 Step 1: Disable public blob access on storage account \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az storage account update \\",
+      "  --name {{STORAGE_ACCOUNT}} \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --allow-blob-public-access false",
+      "",
+      "# \u2500\u2500 Step 2: Set container access level to private \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az storage container set-permission \\",
+      "  --name {{resource}} \\",
+      "  --public-access off \\",
+      "  --account-name {{STORAGE_ACCOUNT}}",
+      "",
+      "# \u2500\u2500 Step 3: Enable storage encryption services \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az storage account update \\",
+      "  --name {{STORAGE_ACCOUNT}} \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --encryption-services blob file",
+      "",
+      "# \u2500\u2500 Step 4: Enable diagnostic logging to Log Analytics \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az monitor diagnostic-settings create \\",
+      "  --name storage-diagnostics \\",
+      "  --resource {{STORAGE_ACCOUNT_ID}} \\",
+      "  --logs '[{\"category\":\"StorageRead\",\"enabled\":true},{\"category\":\"StorageWrite\",\"enabled\":true}]' \\",
+      "  --workspace {{LOG_ANALYTICS_WORKSPACE_ID}}"
+    ]
+  },
+  "RBAC|Azure|HIGH": {
+    "title": "Restrict Azure Service Principal Role",
+    "description": "Removes Owner role at subscription scope and assigns least-privilege Contributor at RG scope.",
+    "provider": "Azure",
+    "commands": [
+      "# \u2500\u2500 Step 1: List current role assignments \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az role assignment list \\",
+      "  --assignee {{resource}} \\",
+      "  --all --output table",
+      "",
+      "# \u2500\u2500 Step 2: Remove Owner role at subscription scope \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az role assignment delete \\",
+      "  --assignee {{resource}} \\",
+      "  --role \"Owner\" \\",
+      "  --scope /subscriptions/{{SUBSCRIPTION_ID}}",
+      "",
+      "# \u2500\u2500 Step 3: Assign least-privilege Contributor at resource group \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az role assignment create \\",
+      "  --assignee {{resource}} \\",
+      "  --role \"Contributor\" \\",
+      "  --scope /subscriptions/{{SUBSCRIPTION_ID}}/resourceGroups/{{RESOURCE_GROUP}}",
+      "",
+      "# \u2500\u2500 Step 4: Verify updated assignments \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az role assignment list \\",
+      "  --assignee {{resource}} \\",
+      "  --all --output table"
+    ]
+  },
+  "KeyVault|Azure|MEDIUM": {
+    "title": "Enable Azure Key Vault Protection",
+    "description": "Activates soft delete and purge protection, and enables audit logging to Log Analytics.",
+    "provider": "Azure",
+    "commands": [
+      "# \u2500\u2500 Step 1: Enable soft delete \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az keyvault update \\",
+      "  --name {{resource}} \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --enable-soft-delete true",
+      "",
+      "# \u2500\u2500 Step 2: Enable purge protection \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az keyvault update \\",
+      "  --name {{resource}} \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --enable-purge-protection true",
+      "",
+      "# \u2500\u2500 Step 3: Enable audit logging \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az monitor diagnostic-settings create \\",
+      "  --name keyvault-audit \\",
+      "  --resource $(az keyvault show --name {{resource}} --query id -o tsv) \\",
+      "  --logs '[{\"category\":\"AuditEvent\",\"enabled\":true}]' \\",
+      "  --workspace {{LOG_ANALYTICS_WORKSPACE_ID}}"
+    ]
+  },
+  "Network|Azure|CRITICAL": {
+    "title": "Block Unrestricted RDP on NSG",
+    "description": "Removes the catch-all RDP allow rule and enforces access from a trusted IP only.",
+    "provider": "Azure",
+    "commands": [
+      "# \u2500\u2500 Step 1: Remove any existing allow-all RDP rules \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az network nsg rule delete \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --nsg-name {{resource}} \\",
+      "  --name Allow-RDP-All",
+      "",
+      "# \u2500\u2500 Step 2: Allow RDP from trusted IP only \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az network nsg rule create \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --nsg-name {{resource}} \\",
+      "  --name Allow-RDP-Trusted \\",
+      "  --priority 100 \\",
+      "  --direction Inbound \\",
+      "  --access Allow \\",
+      "  --protocol Tcp \\",
+      "  --source-address-prefixes {{TRUSTED_IP}}/32 \\",
+      "  --destination-port-ranges 3389",
+      "",
+      "# \u2500\u2500 Step 3: Deny all other RDP \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az network nsg rule create \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --nsg-name {{resource}} \\",
+      "  --name Deny-RDP-All \\",
+      "  --priority 200 \\",
+      "  --direction Inbound \\",
+      "  --access Deny \\",
+      "  --protocol Tcp \\",
+      "  --source-address-prefixes '*' \\",
+      "  --destination-port-ranges 3389",
+      "",
+      "# \u2500\u2500 Step 4: Verify final NSG rules \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "az network nsg rule list \\",
+      "  --resource-group {{RESOURCE_GROUP}} \\",
+      "  --nsg-name {{resource}} \\",
+      "  --output table"
+    ]
+  },
+  "ROOT_ACCOUNT_KEYS|AWS": {
+    "title": "Remove Root Account Access Keys",
+    "description": "Deletes active root access keys and enforces a strong account password policy.",
+    "provider": "AWS",
+    "commands": [
+      "# WARNING - CRITICAL - Execute immediately",
+      "",
+      "# Step 1: List root user access keys. This requires credentials signed",
+      "# by the root user itself - IAM has no user named \"root\", so --user-name",
+      "# is omitted and identity is taken implicitly from the caller's credentials.",
+      "aws iam list-access-keys",
+      "",
+      "# Step 2: Deactivate the root access key (also run with root credentials, no --user-name)",
+      "aws iam update-access-key \\",
+      "  --access-key-id {{ACCESS_KEY_ID}} \\",
+      "  --status Inactive",
+      "",
+      "# Step 3: Delete the root access key",
+      "aws iam delete-access-key \\",
+      "  --access-key-id {{ACCESS_KEY_ID}}",
+      "",
+      "# Step 4: Verify no active root keys remain (expect: 0)",
+      "aws iam get-account-summary --query 'SummaryMap.AccountAccessKeysPresent'",
+      "",
+      "# Step 5: Enforce strong password policy",
+      "aws iam update-account-password-policy \\",
+      "  --minimum-password-length 14 \\",
+      "  --require-symbols \\",
+      "  --require-numbers \\",
+      "  --require-uppercase-characters \\",
+      "  --require-lowercase-characters \\",
+      "  --max-password-age 90"
+    ]
+  },
+  "COMPUTE|AWS": {
+    "title": "Harden AWS EC2 Compute Instance",
+    "description": "Rotates exposed credentials at the instance level, enforces IMDSv2, and restricts network exposure.",
+    "commands": [
+      "# Step 1: Force IMDSv2 (blocks SSRF-based credential theft)",
+      "aws ec2 modify-instance-metadata-options --instance-id {{resource}} \\",
+      "  --http-tokens required --http-endpoint enabled",
+      "",
+      "# Step 2: Rotate the instance's SSH key pair",
+      "aws ec2 create-key-pair --key-name {{NEW_KEY_NAME}} --query 'KeyMaterial' --output text",
+      "",
+      "# Step 3: Reset OS-level password via SSM (no SSH key required)",
+      "aws ssm send-command --instance-ids {{resource}} \\",
+      "  --document-name AWS-RunShellScript \\",
+      "  --parameters 'commands=[\"passwd -e $(whoami)\"]'",
+      "",
+      "# Step 4: Detach the instance profile if it grants excess IAM permissions",
+      "aws ec2 describe-iam-instance-profile-associations --filters Name=instance-id,Values={{resource}}",
+      "",
+      "# Step 5: Restrict the attached security group to essential ports only",
+      "aws ec2 revoke-security-group-ingress --group-id {{SG_ID}} \\",
+      "  --protocol tcp --port 22 --cidr 0.0.0.0/0"
+    ]
+  },
+  "COMPUTE|Azure": {
+    "title": "Harden Azure Virtual Machine",
+    "description": "Rotates local admin/SSH credentials, enables disk encryption, and restricts NSG exposure.",
+    "commands": [
+      "# Step 1: Reset the local admin/OS password",
+      "az vm run-command invoke --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --command-id RunShellScript --scripts \"echo '{{USER}}:{{NEW_PASSWORD}}' | chpasswd\"",
+      "",
+      "# Step 2: Replace the SSH public key",
+      "az vm user update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --username {{USER}} --ssh-key-value {{NEW_SSH_PUBLIC_KEY_PATH}}",
+      "",
+      "# Step 3: Enable Azure Disk Encryption",
+      "az vm encryption enable --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --disk-encryption-keyvault {{KEYVAULT_ID}}",
+      "",
+      "# Step 4: Restrict NSG to essential ports only",
+      "az network nsg rule delete --resource-group {{RG_NAME}} --nsg-name {{NSG_NAME}} --name Allow-All-RDP"
+    ]
+  },
+  "COMPUTE|GCP": {
+    "title": "Harden GCP Compute Engine Instance",
+    "description": "Enforces OS Login, removes exposed SSH keys from metadata, and restricts firewall exposure.",
+    "commands": [
+      "# Step 1: Enforce OS Login at the project level (removes reliance on embedded SSH keys)",
+      "gcloud compute project-info add-metadata --metadata enable-oslogin=TRUE",
+      "",
+      "# Step 2: Remove the exposed/default SSH key from instance metadata",
+      "gcloud compute instances remove-metadata {{resource}} --zone {{ZONE}} --keys=ssh-keys",
+      "",
+      "# Step 3: Enable Shielded VM options",
+      "gcloud compute instances update {{resource}} --zone {{ZONE}} \\",
+      "  --shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring",
+      "",
+      "# Step 4: Restrict the firewall rule to a trusted CIDR only",
+      "gcloud compute firewall-rules update {{FIREWALL_RULE}} --source-ranges={{TRUSTED_CIDR}}"
+    ]
+  },
+  "CONTAINER|AWS": {
+    "title": "Harden AWS EKS Cluster",
+    "description": "Restricts the public API endpoint, moves off broad node-role permissions to IRSA, and enables audit logging.",
+    "commands": [
+      "# Step 1: Restrict (or disable) the public API server endpoint",
+      "aws eks update-cluster-config --name {{resource}} \\",
+      "  --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs={{TRUSTED_CIDR}}",
+      "",
+      "# Step 2: Enable IAM Roles for Service Accounts (replace broad node-role perms)",
+      "eksctl utils associate-iam-oidc-provider --cluster {{resource}} --approve",
+      "",
+      "# Step 3: Enable control-plane audit logging to CloudWatch",
+      "aws eks update-cluster-config --name {{resource}} \\",
+      "  --logging '{\"clusterLogging\":[{\"types\":[\"audit\",\"authenticator\"],\"enabled\":true}]}'",
+      "",
+      "# Step 4: Rotate the cluster's service account tokens",
+      "kubectl delete secret -n kube-system -l kubernetes.io/service-account.name"
+    ]
+  },
+  "CONTAINER|Azure": {
+    "title": "Disable AKS Local Admin Accounts / Enforce Entra ID",
+    "description": "Replaces local cluster-admin credentials with Entra ID (Azure AD) authentication and Azure RBAC.",
+    "commands": [
+      "# Step 1: Enable Entra ID integration and Azure RBAC on the cluster",
+      "az aks update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --enable-aad --aad-admin-group-object-ids {{AAD_ADMIN_GROUP_ID}} \\",
+      "  --enable-azure-rbac",
+      "",
+      "# Step 2: Disable local accounts (removes the --admin backdoor entirely)",
+      "az aks update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --disable-local-accounts",
+      "",
+      "# Step 3: Rotate cluster certificates to revoke anything issued under the old local accounts",
+      "az aks rotate-certs --resource-group {{RG_NAME}} --name {{resource}} --yes",
+      "",
+      "# Step 4: Verify",
+      "az aks show --resource-group {{RG_NAME}} --name {{resource}} --query \"disableLocalAccounts\""
+    ]
+  },
+  "CONTAINER|GCP": {
+    "title": "Harden GKE Cluster",
+    "description": "Disables basic auth/legacy client certs, enables Workload Identity, and restricts the control plane.",
+    "commands": [
+      "# Step 1: Disable legacy basic auth and client certificates",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} \\",
+      "  --no-issue-client-certificate",
+      "",
+      "# Step 2: Enable Workload Identity (replace broad node service-account perms)",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} \\",
+      "  --workload-pool={{PROJECT_ID}}.svc.id.goog",
+      "",
+      "# Step 3: Restrict the control plane to authorized networks only",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} \\",
+      "  --enable-master-authorized-networks --master-authorized-networks={{TRUSTED_CIDR}}",
+      "",
+      "# Step 4: Enable private cluster (no public control-plane endpoint)",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} --enable-private-endpoint"
+    ]
+  },
+  "DATABASE|AWS": {
+    "title": "Harden AWS RDS Instance",
+    "description": "Disables public accessibility, rotates credentials, and enables encryption/deletion protection.",
+    "commands": [
+      "# Step 1: Disable public accessibility",
+      "aws rds modify-db-instance --db-instance-identifier {{resource}} \\",
+      "  --no-publicly-accessible --apply-immediately",
+      "",
+      "# Step 2: Rotate the master credential via Secrets Manager",
+      "aws secretsmanager rotate-secret --secret-id rds/{{resource}}/credentials",
+      "",
+      "# Step 3: Enable deletion protection",
+      "aws rds modify-db-instance --db-instance-identifier {{resource}} \\",
+      "  --deletion-protection --apply-immediately",
+      "",
+      "# Step 4: Verify encryption at rest is on",
+      "aws rds describe-db-instances --db-instance-identifier {{resource}} \\",
+      "  --query 'DBInstances[0].StorageEncrypted'"
+    ]
+  },
+  "DATABASE|Azure": {
+    "title": "Harden Azure SQL Database",
+    "description": "Disables public network access, enforces Entra-ID-only auth, and enables auditing + TDE.",
+    "commands": [
+      "# Step 1: Disable public network access",
+      "az sql server update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --enable-public-network false",
+      "",
+      "# Step 2: Enforce Azure AD-only authentication (retire the SQL admin password)",
+      "az sql server ad-only-auth enable --resource-group {{RG_NAME}} --name {{resource}}",
+      "",
+      "# Step 3: Enable Transparent Data Encryption (on by default, verify)",
+      "az sql db tde show --resource-group {{RG_NAME}} --server {{resource}} --database {{DB_NAME}}",
+      "",
+      "# Step 4: Enable auditing to Log Analytics",
+      "az sql server audit-policy update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --state Enabled --log-analytics-target-state Enabled --log-analytics-workspace-resource-id {{LOG_ANALYTICS_WORKSPACE_ID}}"
+    ]
+  },
+  "DATABASE|GCP": {
+    "title": "Harden GCP Cloud SQL Instance",
+    "description": "Disables public IP, requires SSL, and rotates the root password.",
+    "commands": [
+      "# Step 1: Remove the public IP / disable public access",
+      "gcloud sql instances patch {{resource}} --no-assign-ip",
+      "",
+      "# Step 2: Require SSL for all connections (--ssl-mode replaces the",
+      "# legacy --require-ssl flag; Google recommends --ssl-mode and warns",
+      "# that setting both can conflict)",
+      "gcloud sql instances patch {{resource}} --ssl-mode=ENCRYPTED_ONLY",
+      "",
+      "# Step 3: Rotate the root password",
+      "gcloud sql users set-password root --host=% --instance={{resource}} --password={{NEW_PASSWORD}}",
+      "",
+      "# Step 4: Enable automated backups",
+      "gcloud sql instances patch {{resource}} --backup-start-time=02:00"
+    ]
+  },
+  "SERVERLESS|AWS": {
+    "title": "Remediate AWS Lambda Secrets Exposure",
+    "description": "Moves plaintext secrets out of environment variables into Secrets Manager, and encrypts what remains.",
+    "commands": [
+      "# Step 1: Store the exposed secret in Secrets Manager",
+      "aws secretsmanager create-secret --name {{resource}}-secret --secret-string '{{SECRET_VALUE}}'",
+      "",
+      "# Step 2: Remove the plaintext value from the function's environment variables",
+      "aws lambda update-function-configuration --function-name {{resource}} \\",
+      "  --environment 'Variables={}'",
+      "",
+      "# Step 3: Enable KMS encryption for any environment variables that remain",
+      "aws lambda update-function-configuration --function-name {{resource}} \\",
+      "  --kms-key-arn {{KMS_KEY_ARN}}",
+      "",
+      "# Step 4: Restrict the function's resource-based policy",
+      "aws lambda get-policy --function-name {{resource}}"
+    ]
+  },
+  "SERVERLESS|Azure": {
+    "title": "Remediate Azure Function App Secrets Exposure",
+    "description": "Moves plaintext app settings into Key Vault references and enables a managed identity.",
+    "commands": [
+      "# Step 1: Enable a system-assigned managed identity",
+      "az functionapp identity assign --resource-group {{RG_NAME}} --name {{resource}}",
+      "",
+      "# Step 2: Grant the identity access to the Key Vault secret",
+      "az keyvault set-policy --name {{KEYVAULT_NAME}} --object-id {{IDENTITY_OBJECT_ID}} --secret-permissions get",
+      "",
+      "# Step 3: Replace the plaintext app setting with a Key Vault reference",
+      "az functionapp config appsettings set --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --settings \"{{SETTING_NAME}}=@Microsoft.KeyVault(SecretUri={{SECRET_URI}})\""
+    ]
+  },
+  "SERVERLESS|GCP": {
+    "title": "Remediate GCP Cloud Function/Run Secrets Exposure",
+    "description": "Moves plaintext secrets into Secret Manager and restricts function invocation.",
+    "commands": [
+      "# Step 1: Store the exposed secret in Secret Manager",
+      "gcloud secrets create {{resource}}-secret --data-file={{SECRET_FILE}}",
+      "",
+      "# Step 2: Mount it as a secret instead of a plaintext env var",
+      "gcloud functions deploy {{resource}} --set-secrets='{{ENV_VAR}}={{resource}}-secret:latest'",
+      "",
+      "# Step 3: Restrict who can invoke the function",
+      "gcloud functions remove-iam-policy-binding {{resource}} \\",
+      "  --member=allUsers --role=roles/cloudfunctions.invoker"
+    ]
+  },
+  "SECRETS|AWS": {
+    "title": "Rotate and Restrict Exposed AWS Secret",
+    "description": "Rotates the exposed secret/credential, enables automatic rotation, and restricts access.",
+    "commands": [
+      "# Step 1: Rotate the exposed secret immediately",
+      "aws secretsmanager rotate-secret --secret-id {{resource}}",
+      "",
+      "# Step 2: Enable automatic rotation going forward",
+      "aws secretsmanager rotate-secret --secret-id {{resource}} \\",
+      "  --rotation-lambda-arn {{ROTATION_LAMBDA_ARN}} \\",
+      "  --rotation-rules AutomaticallyAfterDays=30",
+      "",
+      "# Step 3: Restrict IAM access to the secret to only what needs it",
+      "aws secretsmanager get-resource-policy --secret-id {{resource}}"
+    ]
+  },
+  "SECRETS|Azure": {
+    "title": "Rotate and Restrict Exposed Azure Key Vault Secret",
+    "description": "Rotates the exposed secret, sets an expiry, and restricts the access policy.",
+    "commands": [
+      "# Step 1: Set a new secret value",
+      "az keyvault secret set --vault-name {{KEYVAULT_NAME}} --name {{resource}} --value {{NEW_SECRET_VALUE}}",
+      "",
+      "# Step 2: Set an expiry so it can't silently live forever",
+      "az keyvault secret set-attributes --vault-name {{KEYVAULT_NAME}} --name {{resource}} \\",
+      "  --expires {{EXPIRY_DATE}}",
+      "",
+      "# Step 3: Restrict the access policy to only the identities that need it",
+      "az keyvault delete-policy --name {{KEYVAULT_NAME}} --object-id {{OVERBROAD_OBJECT_ID}}"
+    ]
+  },
+  "SECRETS|GCP": {
+    "title": "Rotate and Restrict Exposed GCP Secret",
+    "description": "Adds a new secret version, disables the old one, and restricts IAM access.",
+    "commands": [
+      "# Step 1: Add a new secret version",
+      "gcloud secrets versions add {{resource}} --data-file={{NEW_SECRET_FILE}}",
+      "",
+      "# Step 2: Disable the exposed old version",
+      "gcloud secrets versions disable {{OLD_VERSION_ID}} --secret={{resource}}",
+      "",
+      "# Step 3: Restrict IAM access to the secret",
+      "gcloud secrets get-iam-policy {{resource}}"
+    ]
+  },
+  "API|AWS": {
+    "title": "Harden AWS API Gateway",
+    "description": "Enforces an authorizer, enables WAF, and turns on access logging.",
+    "commands": [
+      "# Step 1: Require an authorizer (IAM or Cognito) on the API",
+      "aws apigateway update-method --rest-api-id {{resource}} --resource-id {{RESOURCE_ID}} \\",
+      "  --http-method ANY --patch-operations op=replace,path=/authorizationType,value=CUSTOM",
+      "",
+      "# Step 2: Associate a WAF web ACL",
+      "aws wafv2 associate-web-acl --web-acl-arn {{WEB_ACL_ARN}} --resource-arn {{resource}}",
+      "",
+      "# Step 3: Enable access logging",
+      "aws apigateway update-stage --rest-api-id {{resource}} --stage-name {{STAGE}} \\",
+      "  --patch-operations op=replace,path=/accessLogSettings/destinationArn,value={{LOG_GROUP_ARN}}"
+    ]
+  },
+  "API|Azure": {
+    "title": "Harden Azure API Management",
+    "description": "Requires a subscription key + OAuth, and enables IP filtering.",
+    "commands": [
+      "# Step 1: Require a subscription key on the API",
+      "az apim api update --resource-group {{RG_NAME}} --service-name {{APIM_NAME}} \\",
+      "  --api-id {{resource}} --subscription-required true",
+      "",
+      "# Step 2: Apply an IP-filtering policy",
+      "az apim api policy import --resource-group {{RG_NAME}} --service-name {{APIM_NAME}} \\",
+      "  --api-id {{resource}} --format xml --value @ip-filter-policy.xml"
+    ]
+  },
+  "API|GCP": {
+    "title": "Harden GCP API Gateway / Cloud Endpoints",
+    "description": "Requires API key + IAM auth and enables Cloud Armor.",
+    "commands": [
+      "# Step 1: Require an API key",
+      "gcloud api-gateway api-configs update {{resource}} --api={{API_ID}} --api-config-id={{CONFIG_ID}}",
+      "",
+      "# Step 2: Attach a Cloud Armor security policy",
+      "gcloud compute backend-services update {{BACKEND_SERVICE}} --security-policy={{ARMOR_POLICY}}"
+    ]
+  },
+  "DEFAULT_CREDENTIALS|Azure|CONTAINER": {
+    "title": "Disable AKS Local Admin Accounts / Enforce Entra ID",
+    "description": "AKS-specific fix for a 'default admin credentials' finding - the VM-style password-reset template does not apply to a managed Kubernetes control plane.",
+    "commands": [
+      "# Step 1: Enable Entra ID integration and Azure RBAC on the cluster",
+      "az aks update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --enable-aad --aad-admin-group-object-ids {{AAD_ADMIN_GROUP_ID}} \\",
+      "  --enable-azure-rbac",
+      "",
+      "# Step 2: Disable local accounts (removes the --admin backdoor entirely)",
+      "az aks update --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --disable-local-accounts",
+      "",
+      "# Step 3: Rotate cluster certificates to revoke anything issued under the old local accounts",
+      "az aks rotate-certs --resource-group {{RG_NAME}} --name {{resource}} --yes",
+      "",
+      "# Step 4: Verify",
+      "az aks show --resource-group {{RG_NAME}} --name {{resource}} --query \"disableLocalAccounts\""
+    ]
+  },
+  "DEFAULT_CREDENTIALS|AWS|CONTAINER": {
+    "title": "Remediate AWS EKS Default/Weak Auth",
+    "description": "EKS-specific fix for a 'default admin credentials' finding - restricts cluster access via aws-auth ConfigMap and IRSA instead of a VM-style password reset.",
+    "commands": [
+      "# Step 1: Restrict the public API endpoint",
+      "aws eks update-cluster-config --name {{resource}} \\",
+      "  --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs={{TRUSTED_CIDR}}",
+      "",
+      "# Step 2: Review and tighten the aws-auth ConfigMap role bindings",
+      "kubectl get configmap aws-auth -n kube-system -o yaml",
+      "",
+      "# Step 3: Enable audit logging",
+      "aws eks update-cluster-config --name {{resource}} \\",
+      "  --logging '{\"clusterLogging\":[{\"types\":[\"audit\"],\"enabled\":true}]}'"
+    ]
+  },
+  "DEFAULT_CREDENTIALS|GCP|CONTAINER": {
+    "title": "Remediate GKE Default/Legacy Auth",
+    "description": "GKE-specific fix for a 'default admin credentials' finding - disables legacy basic auth/client certs instead of a VM-style password reset.",
+    "commands": [
+      "# Step 1: Disable legacy basic auth and client certificates",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} --no-issue-client-certificate",
+      "",
+      "# Step 2: Enable Workload Identity",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} \\",
+      "  --workload-pool={{PROJECT_ID}}.svc.id.goog",
+      "",
+      "# Step 3: Restrict the control plane to authorized networks",
+      "gcloud container clusters update {{resource}} --zone {{ZONE}} \\",
+      "  --enable-master-authorized-networks --master-authorized-networks={{TRUSTED_CIDR}}"
+    ]
+  },
+  "DEFAULT_CREDENTIALS|AWS|DATABASE": {
+    "title": "Remediate AWS RDS Default Credentials",
+    "description": "RDS-specific fix for a 'default admin credentials' finding - rotates via Secrets Manager rather than an OS-level password reset.",
+    "commands": [
+      "# Step 1: Rotate the master credential via Secrets Manager",
+      "aws secretsmanager rotate-secret --secret-id rds/{{resource}}/credentials",
+      "",
+      "# Step 2: Disable public accessibility",
+      "aws rds modify-db-instance --db-instance-identifier {{resource}} \\",
+      "  --no-publicly-accessible --apply-immediately",
+      "",
+      "# Step 3: Verify no default/well-known admin username remains",
+      "aws rds describe-db-instances --db-instance-identifier {{resource}} --query 'DBInstances[0].MasterUsername'"
+    ]
+  },
+  "DEFAULT_CREDENTIALS|Azure|DATABASE": {
+    "title": "Remediate Azure SQL Default Credentials",
+    "description": "Azure SQL-specific fix for a 'default admin credentials' finding - moves to Entra-ID-only auth rather than an OS-level password reset.",
+    "commands": [
+      "# Step 1: Enforce Azure AD-only authentication",
+      "az sql server ad-only-auth enable --resource-group {{RG_NAME}} --name {{resource}}",
+      "",
+      "# Step 2: Rotate/retire the SQL admin login password",
+      "az sql server update --resource-group {{RG_NAME}} --name {{resource}} --admin-password {{NEW_PASSWORD}}",
+      "",
+      "# Step 3: Disable public network access",
+      "az sql server update --resource-group {{RG_NAME}} --name {{resource}} --enable-public-network false"
+    ]
+  },
+  "DEFAULT_CREDENTIALS|GCP|DATABASE": {
+    "title": "Remediate GCP Cloud SQL Default Credentials",
+    "description": "Cloud SQL-specific fix for a 'default admin credentials' finding.",
+    "commands": [
+      "# Step 1: Rotate the root password",
+      "gcloud sql users set-password root --host=% --instance={{resource}} --password={{NEW_PASSWORD}}",
+      "",
+      "# Step 2: Remove public IP access",
+      "gcloud sql instances patch {{resource}} --no-assign-ip",
+      "",
+      "# Step 3: Require SSL for all connections (--ssl-mode replaces the",
+      "# legacy --require-ssl flag; Google recommends --ssl-mode and warns",
+      "# that setting both can conflict)",
+      "gcloud sql instances patch {{resource}} --ssl-mode=ENCRYPTED_ONLY"
+    ]
+  },
+  "MONITORING|AWS": {
+    "title": "Remediate AWS Monitoring/Logging Gap",
+    "description": "Enable account-wide CloudTrail logging, AWS Config recording, and a baseline CloudWatch alarm.",
+    "commands": [
+      "# Step 1: Enable multi-region CloudTrail with log file validation",
+      "aws cloudtrail create-trail --name {{TRAIL_NAME}} \\",
+      "  --s3-bucket-name {{LOG_BUCKET}} --is-multi-region-trail \\",
+      "  --enable-log-file-validation",
+      "aws cloudtrail start-logging --name {{TRAIL_NAME}}",
+      "",
+      "# Step 2: Enable AWS Config to record configuration changes",
+      "aws configservice put-configuration-recorder \\",
+      "  --configuration-recorder name=default,roleARN={{CONFIG_ROLE_ARN}} \\",
+      "  --recording-group allSupported=true,includeGlobalResourceTypes=true",
+      "aws configservice start-configuration-recorder --configuration-recorder-name default",
+      "",
+      "# Step 3: Create a baseline CloudWatch alarm on unauthorized API calls",
+      "aws cloudwatch put-metric-alarm --alarm-name {{ALARM_NAME}} \\",
+      "  --metric-name UnauthorizedAPICalls --namespace CloudTrailMetrics \\",
+      "  --statistic Sum --period 300 --threshold 1 \\",
+      "  --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1"
+    ]
+  },
+  "MONITORING|AZURE": {
+    "title": "Remediate Azure Monitoring/Logging Gap",
+    "description": "Enable diagnostic settings to a Log Analytics workspace and a baseline activity-log alert.",
+    "commands": [
+      "# Step 1: Create a Log Analytics workspace (if one is not already in place)",
+      "az monitor log-analytics workspace create \\",
+      "  --resource-group {{RG_NAME}} --workspace-name {{WORKSPACE_NAME}}",
+      "",
+      "# Step 2: Route diagnostic logs from the resource to the workspace",
+      "az monitor diagnostic-settings create --name {{DIAG_SETTING_NAME}} \\",
+      "  --resource {{resource}} \\",
+      "  --workspace {{WORKSPACE_NAME}} \\",
+      "  --logs '[{\"category\": \"Administrative\", \"enabled\": true}]'",
+      "",
+      "# Step 3: Create an activity-log alert for high-severity administrative changes",
+      "az monitor activity-log alert create --name {{ALERT_NAME}} \\",
+      "  --resource-group {{RG_NAME}} \\",
+      "  --condition category=Administrative and level=Critical"
+    ]
+  },
+  "MONITORING|GCP": {
+    "title": "Remediate GCP Monitoring/Logging Gap",
+    "description": "Enable a project-wide audit log sink and a baseline alerting policy.",
+    "commands": [
+      "# Step 1: Create a logging sink that exports audit logs for retention",
+      "gcloud logging sinks create {{SINK_NAME}} \\",
+      "  storage.googleapis.com/{{LOG_BUCKET}} \\",
+      "  --project={{PROJECT_ID}} \\",
+      "  --log-filter='logName:\"cloudaudit.googleapis.com\"'",
+      "",
+      "# Step 2: Enable Data Access audit logs for the project",
+      "gcloud projects get-iam-policy {{PROJECT_ID}} --format=json > /tmp/policy.json",
+      "# Edit /tmp/policy.json to add an auditConfigs block enabling DATA_READ/DATA_WRITE, then:",
+      "gcloud projects set-iam-policy {{PROJECT_ID}} /tmp/policy.json",
+      "",
+      "# Step 3: Create a baseline alerting policy for IAM policy changes",
+      "gcloud alpha monitoring policies create \\",
+      "  --notification-channels={{CHANNEL_ID}} \\",
+      "  --display-name='IAM Policy Change Alert' \\",
+      "  --condition-display-name='IAM change detected'"
+    ]
+  },
+  "DATA_PROTECTION|AWS": {
+    "title": "Remediate AWS Data Protection Gap",
+    "description": "Enable versioning/backup on the affected resource and turn on Macie for sensitive-data discovery.",
+    "commands": [
+      "# Step 1: Enable versioning so data can be recovered after accidental change/delete",
+      "aws s3api put-bucket-versioning --bucket {{resource}} \\",
+      "  --versioning-configuration Status=Enabled",
+      "",
+      "# Step 2: Add the resource to an AWS Backup plan",
+      "aws backup create-backup-plan --backup-plan file://backup-plan.json",
+      "aws backup create-backup-selection \\",
+      "  --backup-plan-id {{BACKUP_PLAN_ID}} \\",
+      "  --backup-selection file://backup-selection.json",
+      "",
+      "# Step 3: Enable Macie to discover and classify sensitive data",
+      "aws macie2 enable-macie --status ENABLED --finding-publishing-frequency FIFTEEN_MINUTES"
+    ]
+  },
+  "DATA_PROTECTION|AZURE": {
+    "title": "Remediate Azure Data Protection Gap",
+    "description": "Enable soft-delete/backup on the resource and turn on Microsoft Purview data classification.",
+    "commands": [
+      "# Step 1: Enable soft delete and blob versioning on the storage account",
+      "az storage account blob-service-properties update \\",
+      "  --account-name {{STORAGE_ACCOUNT}} --resource-group {{RG_NAME}} \\",
+      "  --enable-delete-retention true --delete-retention-days 30 \\",
+      "  --enable-versioning true",
+      "",
+      "# Step 2: Add the resource to an Azure Backup vault policy",
+      "az backup protection enable-for-azurewl \\",
+      "  --resource-group {{RG_NAME}} --vault-name {{VAULT_NAME}} \\",
+      "  --policy-name {{POLICY_NAME}} --protectable-item-name {{resource}}",
+      "",
+      "# Step 3: Register the subscription with Microsoft Purview for data classification",
+      "az purview account create --resource-group {{RG_NAME}} --name {{PURVIEW_ACCOUNT}}"
+    ]
+  },
+  "DATA_PROTECTION|GCP": {
+    "title": "Remediate GCP Data Protection Gap",
+    "description": "Enable object versioning/backups and run a Cloud DLP inspection job on the affected resource.",
+    "commands": [
+      "# Step 1: Enable object versioning on the bucket",
+      "gsutil versioning set on gs://{{resource}}",
+      "",
+      "# Step 2: Configure a scheduled backup / snapshot policy",
+      "gcloud compute resource-policies create snapshot-schedule {{SCHEDULE_NAME}} \\",
+      "  --project={{PROJECT_ID}} --region={{REGION}} \\",
+      "  --max-retention-days=30 --daily-schedule --start-time=03:00",
+      "",
+      "# Step 3: Run a Cloud DLP inspection job to find sensitive data",
+      "gcloud dlp jobs create inspect \\",
+      "  --project={{PROJECT_ID}} \\",
+      "  --storage-config='{\"cloudStorageOptions\":{\"fileSet\":{\"url\":\"gs://{{resource}}/*\"}}}'"
+    ]
+  },
+  "IAM_MISCONFIGURATION|AWS": {
+    "title": "Remediate AWS IAM Misconfiguration",
+    "description": "Audit and correct an IAM entity's policy attachments, removing stale or overly broad grants.",
+    "commands": [
+      "# Step 1: Pull the full authorization snapshot for review",
+      "aws iam get-account-authorization-details > /tmp/iam-snapshot.json",
+      "",
+      "# Step 2: Run IAM Access Analyzer to surface unused/external-facing permissions",
+      "aws accessanalyzer create-analyzer --analyzer-name {{ANALYZER_NAME}} --type ACCOUNT",
+      "aws accessanalyzer list-findings --analyzer-arn {{ANALYZER_ARN}}",
+      "",
+      "# Step 3: Detach the misconfigured policy and reattach a scoped replacement",
+      "aws iam detach-role-policy --role-name {{ROLE_NAME}} --policy-arn {{POLICY_ARN}}",
+      "aws iam attach-role-policy --role-name {{ROLE_NAME}} --policy-arn {{SCOPED_POLICY_ARN}}"
+    ]
+  },
+  "IAM_MISCONFIGURATION|AZURE": {
+    "title": "Remediate Azure IAM Misconfiguration",
+    "description": "Audit role assignments for the identity and replace an overly broad grant with a scoped one.",
+    "commands": [
+      "# Step 1: List current role assignments for the identity",
+      "az role assignment list --assignee {{PRINCIPAL_ID}} --all --output table",
+      "",
+      "# Step 2: Remove the overly broad role assignment",
+      "az role assignment delete --assignee {{PRINCIPAL_ID}} \\",
+      "  --role {{CURRENT_ROLE}} --scope {{SCOPE}}",
+      "",
+      "# Step 3: Assign a least-privilege role scoped to the resource group",
+      "az role assignment create --assignee {{PRINCIPAL_ID}} \\",
+      "  --role {{SCOPED_ROLE}} --scope /subscriptions/{{SUBSCRIPTION_ID}}/resourceGroups/{{RG_NAME}}"
+    ]
+  },
+  "IAM_MISCONFIGURATION|GCP": {
+    "title": "Remediate GCP IAM Misconfiguration",
+    "description": "Audit project IAM bindings and replace a primitive-role grant with a scoped custom role.",
+    "commands": [
+      "# Step 1: Export the current IAM policy for review",
+      "gcloud projects get-iam-policy {{PROJECT_ID}} --format=json > /tmp/iam-policy.json",
+      "",
+      "# Step 2: Remove the overly broad binding",
+      "gcloud projects remove-iam-policy-binding {{PROJECT_ID}} \\",
+      "  --member={{MEMBER}} --role={{CURRENT_ROLE}}",
+      "",
+      "# Step 3: Grant a scoped custom role instead",
+      "gcloud projects add-iam-policy-binding {{PROJECT_ID}} \\",
+      "  --member={{MEMBER}} --role={{SCOPED_ROLE}}"
+    ]
+  },
+  "SECURITY_POLICY|AWS": {
+    "title": "Remediate AWS Security Policy Gap",
+    "description": "Turn on Security Hub, enable the relevant standard, and enforce an SCP guardrail at the org level.",
+    "commands": [
+      "# Step 1: Enable Security Hub and a baseline standard",
+      "aws securityhub enable-security-hub --enable-default-standards",
+      "",
+      "# Step 2: Create a preventative Service Control Policy",
+      "aws organizations create-policy --name {{SCP_NAME}} \\",
+      "  --type SERVICE_CONTROL_POLICY --content file://{{SCP_FILE}}",
+      "",
+      "# Step 3: Attach the SCP to the relevant organizational unit",
+      "aws organizations attach-policy --policy-id {{POLICY_ID}} --target-id {{OU_ID}}"
+    ]
+  },
+  "SECURITY_POLICY|AZURE": {
+    "title": "Remediate Azure Security Policy Gap",
+    "description": "Assign an Azure Policy definition and enable auto-provisioning of the Microsoft Defender agent.",
+    "commands": [
+      "# Step 1: Assign a built-in security policy initiative to the subscription",
+      "az policy assignment create --name {{ASSIGNMENT_NAME}} \\",
+      "  --policy {{POLICY_DEFINITION_ID}} \\",
+      "  --scope /subscriptions/{{SUBSCRIPTION_ID}}",
+      "",
+      "# Step 2: Enable auto-provisioning of the Microsoft Defender for Cloud agent",
+      "az security auto-provisioning-setting update --name default --auto-provision on",
+      "",
+      "# Step 3: Confirm the assignment took effect",
+      "az policy assignment list --disable-scope-strict-match --output table"
+    ]
+  },
+  "SECURITY_POLICY|GCP": {
+    "title": "Remediate GCP Security Policy Gap",
+    "description": "Set an organization policy constraint and confirm Security Command Center is enabled to enforce it.",
+    "commands": [
+      "# Step 1: Set an organization policy constraint (e.g. restrict public IP)",
+      "gcloud resource-manager org-policies enable-enforce \\",
+      "  compute.vmExternalIpAccess --organization={{ORG_ID}}",
+      "",
+      "# Step 2: Confirm Security Command Center is enabled to monitor compliance",
+      "gcloud scc settings services describe SECURITY_HEALTH_ANALYTICS \\",
+      "  --organization={{ORG_ID}}",
+      "",
+      "# Step 3: List current findings against the new constraint",
+      "gcloud scc findings list {{ORG_ID}} --filter='category=\"PUBLIC_IP_ADDRESS\"'"
+    ]
+  },
+  "RESOURCE_CONTROL|AWS": {
+    "title": "Remediate AWS Resource Control Gap",
+    "description": "Apply tag-based governance and a service quota/SCP guardrail to the resource.",
+    "commands": [
+      "# Step 1: Tag the resource so it falls under governance/automation scope",
+      "aws resourcegroupstaggingapi tag-resources \\",
+      "  --resource-arn-list {{RESOURCE_ARN}} \\",
+      "  --tags Environment={{ENV}},Owner={{OWNER}}",
+      "",
+      "# Step 2: Enforce a tagging policy via SCP so untagged resources cannot be created",
+      "aws organizations create-policy --name {{TAG_POLICY_NAME}} \\",
+      "  --type TAG_POLICY --content file://{{TAG_POLICY_FILE}}",
+      "",
+      "# Step 3: Review current service quota headroom for the resource type",
+      "aws service-quotas list-service-quotas --service-code {{SERVICE_CODE}}"
+    ]
+  },
+  "RESOURCE_CONTROL|AZURE": {
+    "title": "Remediate Azure Resource Control Gap",
+    "description": "Apply resource tagging and an Azure Policy deny/audit rule to prevent similar drift.",
+    "commands": [
+      "# Step 1: Tag the resource for ownership and lifecycle tracking",
+      "az resource tag --tags Environment={{ENV}} Owner={{OWNER}} \\",
+      "  --ids {{RESOURCE_ID}}",
+      "",
+      "# Step 2: Create a policy definition that denies non-compliant resource creation",
+      "az policy definition create --name {{POLICY_NAME}} \\",
+      "  --rules {{POLICY_RULE_FILE}} --mode Indexed",
+      "",
+      "# Step 3: Assign the policy at the resource group scope",
+      "az policy assignment create --name {{ASSIGNMENT_NAME}} \\",
+      "  --policy {{POLICY_NAME}} --resource-group {{RG_NAME}}"
+    ]
+  },
+  "RESOURCE_CONTROL|GCP": {
+    "title": "Remediate GCP Resource Control Gap",
+    "description": "Apply resource labels and an organization policy constraint to control resource sprawl.",
+    "commands": [
+      "# Step 1: Label the resource for ownership and lifecycle tracking",
+      "gcloud resource-manager tags bindings create \\",
+      "  --tag-value={{TAG_VALUE}} --parent={{RESOURCE_ID}}",
+      "",
+      "# Step 2: Constrain which resource types/locations can be created",
+      "gcloud resource-manager org-policies set-policy {{POLICY_FILE}} \\",
+      "  --project={{PROJECT_ID}}",
+      "",
+      "# Step 3: Review current asset inventory against the new constraint",
+      "gcloud asset search-all-resources --scope=projects/{{PROJECT_ID}}"
+    ]
+  },
+  "INJECTION|AWS": {
+    "title": "Remediate AWS Injection Vulnerability",
+    "description": "Attach AWS WAF managed rule groups covering SQLi/XSS/command injection to the exposed endpoint.",
+    "commands": [
+      "# Step 1: Create a Web ACL with the AWS managed SQLi/XSS rule sets",
+      "aws wafv2 create-web-acl --name {{WEBACL_NAME}} --scope REGIONAL \\",
+      "  --default-action Allow={} \\",
+      "  --rules file://{{MANAGED_RULES_FILE}}",
+      "",
+      "# Step 2: Associate the Web ACL with the exposed API Gateway/ALB",
+      "aws wafv2 associate-web-acl --web-acl-arn {{WEBACL_ARN}} \\",
+      "  --resource-arn {{RESOURCE_ARN}}",
+      "",
+      "# Step 3: Enable logging on the Web ACL to confirm the rules are catching traffic",
+      "aws wafv2 put-logging-configuration --logging-configuration \\",
+      "  ResourceArn={{WEBACL_ARN}},LogDestinationConfigs={{LOG_DEST_ARN}}"
+    ]
+  },
+  "INJECTION|AZURE": {
+    "title": "Remediate Azure Injection Vulnerability",
+    "description": "Enable the WAF on Application Gateway/Front Door with the OWASP Core Rule Set.",
+    "commands": [
+      "# Step 1: Enable WAF on the Application Gateway",
+      "az network application-gateway waf-config set \\",
+      "  --gateway-name {{GATEWAY_NAME}} --resource-group {{RG_NAME}} \\",
+      "  --enabled true --firewall-mode Prevention",
+      "",
+      "# Step 2: Attach the OWASP Core Rule Set for SQLi/XSS coverage",
+      "az network application-gateway waf-policy managed-rule rule-set add \\",
+      "  --policy-name {{WAF_POLICY_NAME}} --resource-group {{RG_NAME}} \\",
+      "  --type OWASP --version 3.2",
+      "",
+      "# Step 3: Confirm the policy is linked to the listener",
+      "az network application-gateway show --name {{GATEWAY_NAME}} \\",
+      "  --resource-group {{RG_NAME}} --query 'firewallPolicy'"
+    ]
+  },
+  "INJECTION|GCP": {
+    "title": "Remediate GCP Injection Vulnerability",
+    "description": "Enable Cloud Armor with preconfigured SQLi/XSS WAF rules in front of the exposed service.",
+    "commands": [
+      "# Step 1: Create a Cloud Armor security policy",
+      "gcloud compute security-policies create {{POLICY_NAME}} \\",
+      "  --description='Blocks SQLi/XSS/command injection patterns'",
+      "",
+      "# Step 2: Add the preconfigured SQLi and XSS rules",
+      "gcloud compute security-policies rules create 1000 \\",
+      "  --security-policy={{POLICY_NAME}} \\",
+      "  --expression=\"evaluatePreconfiguredExpr('sqli-stable')\" --action=deny-403",
+      "gcloud compute security-policies rules create 1001 \\",
+      "  --security-policy={{POLICY_NAME}} \\",
+      "  --expression=\"evaluatePreconfiguredExpr('xss-stable')\" --action=deny-403",
+      "",
+      "# Step 3: Attach the policy to the backend service",
+      "gcloud compute backend-services update {{BACKEND_SERVICE}} \\",
+      "  --security-policy={{POLICY_NAME}}"
+    ]
+  },
+  "API_SECURITY|AWS": {
+    "title": "Remediate AWS API Security Gap",
+    "description": "Require an authorizer on the API Gateway route and enable throttling to prevent abuse.",
+    "commands": [
+      "# Step 1: Require an IAM/Lambda/Cognito authorizer on the route",
+      "aws apigateway update-method --rest-api-id {{API_ID}} \\",
+      "  --resource-id {{RESOURCE_ID}} --http-method {{HTTP_METHOD}} \\",
+      "  --patch-operations op=replace,path=/authorizationType,value=CUSTOM",
+      "",
+      "# Step 2: Enable per-client throttling on the usage plan",
+      "aws apigateway update-usage-plan --usage-plan-id {{USAGE_PLAN_ID}} \\",
+      "  --patch-operations op=replace,path=/throttle/rateLimit,value=50",
+      "",
+      "# Step 3: Associate a WAF Web ACL with the API stage",
+      "aws wafv2 associate-web-acl --web-acl-arn {{WEBACL_ARN}} \\",
+      "  --resource-arn {{API_STAGE_ARN}}"
+    ]
+  },
+  "API_SECURITY|AZURE": {
+    "title": "Remediate Azure API Security Gap",
+    "description": "Require a subscription key/OAuth policy on the API Management operation and enable rate limiting.",
+    "commands": [
+      "# Step 1: Require a subscription key on the API",
+      "az apim api update --resource-group {{RG_NAME}} \\",
+      "  --service-name {{APIM_NAME}} --api-id {{API_ID}} \\",
+      "  --subscription-required true",
+      "",
+      "# Step 2: Apply a rate-limit policy to the API",
+      "az apim api operation update --resource-group {{RG_NAME}} \\",
+      "  --service-name {{APIM_NAME}} --api-id {{API_ID}} \\",
+      "  --operation-id {{OPERATION_ID}} \\",
+      "  --set policies='<rate-limit calls=\"60\" renewal-period=\"60\"/>'",
+      "",
+      "# Step 3: Enable the WAF policy on the Front Door/App Gateway in front of the API",
+      "az network application-gateway waf-config set \\",
+      "  --gateway-name {{GATEWAY_NAME}} --resource-group {{RG_NAME}} --enabled true"
+    ]
+  },
+  "API_SECURITY|GCP": {
+    "title": "Remediate GCP API Security Gap",
+    "description": "Require an API key/auth on the Cloud Endpoints service and enable a quota limit.",
+    "commands": [
+      "# Step 1: Require authentication in the OpenAPI/gRPC service config, then redeploy",
+      "gcloud endpoints services deploy {{OPENAPI_SPEC_FILE}} \\",
+      "  --project={{PROJECT_ID}}",
+      "",
+      "# Step 2: Set a per-consumer quota limit on the API",
+      "gcloud endpoints services deploy {{QUOTA_CONFIG_FILE}} \\",
+      "  --project={{PROJECT_ID}}",
+      "",
+      "# Step 3: Attach a Cloud Armor policy to the load balancer in front of the API",
+      "gcloud compute backend-services update {{BACKEND_SERVICE}} \\",
+      "  --security-policy={{POLICY_NAME}}"
+    ]
+  },
+  "PATCH_MANAGEMENT|AWS": {
+    "title": "Remediate AWS Patch Management Gap",
+    "description": "Register the instance with a patch baseline and run an on-demand patch scan/install.",
+    "commands": [
+      "# Step 1: Associate the instance with a patch baseline via State Manager",
+      "aws ssm create-association --name AWS-RunPatchBaseline \\",
+      "  --targets Key=instanceids,Values={{INSTANCE_ID}} \\",
+      "  --schedule-expression 'rate(7 days)'",
+      "",
+      "# Step 2: Run an on-demand patch scan",
+      "aws ssm send-command --document-name AWS-RunPatchBaseline \\",
+      "  --targets Key=instanceids,Values={{INSTANCE_ID}} \\",
+      "  --parameters Operation=Scan",
+      "",
+      "# Step 3: Install missing patches",
+      "aws ssm send-command --document-name AWS-RunPatchBaseline \\",
+      "  --targets Key=instanceids,Values={{INSTANCE_ID}} \\",
+      "  --parameters Operation=Install"
+    ]
+  },
+  "PATCH_MANAGEMENT|AZURE": {
+    "title": "Remediate Azure Patch Management Gap",
+    "description": "Enable Azure Update Manager on the VM and run an on-demand assessment/install.",
+    "commands": [
+      "# Step 1: Enable automatic patching via Update Manager",
+      "az vm update --resource-group {{RG_NAME}} --name {{VM_NAME}} \\",
+      "  --set osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform",
+      "",
+      "# Step 2: Run an on-demand patch assessment",
+      "az vm assess-patches --resource-group {{RG_NAME}} --name {{VM_NAME}}",
+      "",
+      "# Step 3: Install available patches",
+      "az vm install-patches --resource-group {{RG_NAME}} --name {{VM_NAME}} \\",
+      "  --maximum-duration PT2H --reboot-setting IfRequired"
+    ]
+  },
+  "PATCH_MANAGEMENT|GCP": {
+    "title": "Remediate GCP Patch Management Gap",
+    "description": "Create an OS Config patch deployment and execute an on-demand patch job on the instance.",
+    "commands": [
+      "# Step 1: Create a recurring patch deployment",
+      "gcloud compute os-config patch-deployments create {{DEPLOYMENT_NAME}} \\",
+      "  --project={{PROJECT_ID}} \\",
+      "  --instance-filter-labels=env={{ENV}} \\",
+      "  --recurring-weekly=day-of-week=SUNDAY,time-of-day=03:00",
+      "",
+      "# Step 2: Execute an on-demand patch job now",
+      "gcloud compute os-config patch-jobs execute \\",
+      "  --project={{PROJECT_ID}} --instance-filter-labels=env={{ENV}}",
+      "",
+      "# Step 3: Check the patch job status",
+      "gcloud compute os-config patch-jobs list --project={{PROJECT_ID}}"
+    ]
+  },
+  "MISCONFIGURATION|AWS": {
+    "title": "Remediate AWS General Misconfiguration",
+    "description": "Re-run the AWS Config conformance pack against the resource and apply the recommended fix.",
+    "commands": [
+      "# Step 1: Pull the current configuration of the resource",
+      "aws configservice get-resource-config-history \\",
+      "  --resource-type {{RESOURCE_TYPE}} --resource-id {{RESOURCE_ID}}",
+      "",
+      "# Step 2: Re-evaluate the resource against the conformance pack",
+      "aws configservice start-config-rules-evaluation --config-rule-names {{RULE_NAME}}",
+      "",
+      "# Step 3: Apply the AWS Config remediation action for the failing rule",
+      "aws configservice start-remediation-execution \\",
+      "  --config-rule-name {{RULE_NAME}} \\",
+      "  --resource-keys resourceType={{RESOURCE_TYPE}},resourceId={{RESOURCE_ID}}"
+    ]
+  },
+  "MISCONFIGURATION|AZURE": {
+    "title": "Remediate Azure General Misconfiguration",
+    "description": "Re-run the Microsoft Defender for Cloud assessment on the resource and apply the recommended fix.",
+    "commands": [
+      "# Step 1: List current security assessments for the resource",
+      "az security assessment list --resource-group {{RG_NAME}}",
+      "",
+      "# Step 2: Trigger a fresh compliance evaluation",
+      "az security regulatory-compliance-standards list",
+      "",
+      "# Step 3: Apply the fix recommended by the assessment",
+      "az security assessment update --name {{ASSESSMENT_NAME}} \\",
+      "  --resource-group {{RG_NAME}} --status Healthy"
+    ]
+  },
+  "MISCONFIGURATION|GCP": {
+    "title": "Remediate GCP General Misconfiguration",
+    "description": "Re-check the Security Command Center finding for the resource and apply the recommended fix.",
+    "commands": [
+      "# Step 1: List current findings for the resource",
+      "gcloud scc findings list {{ORG_ID}} \\",
+      "  --filter='resourceName=\"{{RESOURCE_NAME}}\"'",
+      "",
+      "# Step 2: Review the recommender's suggested remediation",
+      "gcloud recommender recommendations list \\",
+      "  --project={{PROJECT_ID}} --recommender=google.iam.policy.Recommender",
+      "",
+      "# Step 3: Mark the finding as resolved once the fix is applied",
+      "gcloud scc findings update {{FINDING_NAME}} --state=INACTIVE"
+    ]
+  },
+  "SERVER-SIDE_REQUEST_FORGERY|AWS": {
+    "title": "Remediate AWS SSRF Exposure",
+    "description": "Enforce IMDSv2 (session-token-required) so a request-forgery bug cannot reach instance credentials.",
+    "commands": [
+      "# Step 1: Require IMDSv2 tokens on the instance metadata service",
+      "aws ec2 modify-instance-metadata-options --instance-id {{INSTANCE_ID}} \\",
+      "  --http-tokens required --http-endpoint enabled",
+      "",
+      "# Step 2: Reduce the metadata hop limit to block containerised/proxied access",
+      "aws ec2 modify-instance-metadata-options --instance-id {{INSTANCE_ID}} \\",
+      "  --http-put-response-hop-limit 1",
+      "",
+      "# Step 3: Confirm the setting applied",
+      "aws ec2 describe-instances --instance-ids {{INSTANCE_ID}} \\",
+      "  --query 'Reservations[].Instances[].MetadataOptions'"
+    ]
+  },
+  "SERVER-SIDE_REQUEST_FORGERY|AZURE": {
+    "title": "Remediate Azure SSRF Exposure",
+    "description": "Restrict outbound access to the instance metadata endpoint via NSG rule so SSRF cannot reach it externally.",
+    "commands": [
+      "# Step 1: Add an NSG rule blocking egress to the metadata service IP from untrusted subnets",
+      "az network nsg rule create --resource-group {{RG_NAME}} \\",
+      "  --nsg-name {{NSG_NAME}} --name BlockIMDSFromApp \\",
+      "  --priority 100 --direction Outbound --access Deny \\",
+      "  --destination-address-prefixes 169.254.169.254",
+      "",
+      "# Step 2: Ensure the app only reaches IMDS from the code path that needs it",
+      "az network nsg rule create --resource-group {{RG_NAME}} \\",
+      "  --nsg-name {{NSG_NAME}} --name AllowIMDSFromTrustedProcess \\",
+      "  --priority 90 --direction Outbound --access Allow \\",
+      "  --destination-address-prefixes 169.254.169.254 --source-address-prefixes {{TRUSTED_SUBNET}}",
+      "",
+      "# Step 3: Verify the effective rules on the NSG",
+      "az network nsg rule list --resource-group {{RG_NAME}} --nsg-name {{NSG_NAME}} --output table"
+    ]
+  },
+  "SERVER-SIDE_REQUEST_FORGERY|GCP": {
+    "title": "Remediate GCP SSRF Exposure",
+    "description": "Disable legacy (unauthenticated) metadata endpoints on the instance so a forged request cannot reach them.",
+    "commands": [
+      "# Step 1: Disable the legacy v0.1/v1beta1 metadata endpoints",
+      "gcloud compute instances add-metadata {{INSTANCE_NAME}} \\",
+      "  --zone={{ZONE}} --metadata=disable-legacy-endpoints=true",
+      "",
+      "# Step 2: Restrict egress from the app tier to the metadata server IP",
+      "gcloud compute firewall-rules create block-imds-from-app \\",
+      "  --direction=EGRESS --action=DENY \\",
+      "  --destination-ranges=169.254.169.254/32 \\",
+      "  --target-tags={{APP_TAG}}",
+      "",
+      "# Step 3: Confirm the metadata setting applied",
+      "gcloud compute instances describe {{INSTANCE_NAME}} --zone={{ZONE}} \\",
+      "  --format='value(metadata.items)'"
+    ]
+  },
+  "PRIVILEGED_WORKLOAD|AWS": {
+    "title": "Restrict Privileged Containers on EKS",
+    "description": "Blocks privileged/host-escaping pod specs at admission time and remediates existing workloads, instead of touching cluster authentication (which is a separate control plane).",
+    "commands": [
+      "# Step 1: Enforce Pod Security Standards at the namespace level (built into",
+      "# Kubernetes 1.23+, no add-on required) - blocks new privileged pods",
+      "kubectl label namespace {{NAMESPACE}} \\",
+      "  pod-security.kubernetes.io/enforce=restricted \\",
+      "  pod-security.kubernetes.io/enforce-version=latest --overwrite",
+      "",
+      "# Step 2: Audit existing workloads for privileged containers",
+      "kubectl get pods --all-namespaces -o json | \\",
+      "  jq -r '.items[] | select(.spec.containers[]?.securityContext?.privileged==true or .spec.hostPID==true or .spec.hostNetwork==true) | \"\\(.metadata.namespace)/\\(.metadata.name)\"'",
+      "",
+      "# Step 3: Patch a flagged workload's securityContext to remove privileged mode",
+      "kubectl patch deployment {{WORKLOAD_NAME}} -n {{NAMESPACE}} --type=json -p \\",
+      "  '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/securityContext/privileged\",\"value\":false}]'",
+      "",
+      "# Step 4: Verify no privileged pods remain",
+      "kubectl get pods --all-namespaces -o json | \\",
+      "  jq '[.items[] | select(.spec.containers[]?.securityContext?.privileged==true)] | length'"
+    ]
+  },
+  "PRIVILEGED_WORKLOAD|Azure": {
+    "title": "Restrict Privileged Containers on AKS",
+    "description": "Blocks privileged/host-escaping pod specs via Azure Policy's built-in pod-security initiative (looked up by name, not a hardcoded ID) or Pod Security Admission, and remediates existing workloads. This is a workload admission-control fix, distinct from cluster authentication hardening (see CONTAINER|Azure).",
+    "commands": [
+      "# Step 1: Enable the Azure Policy Add-on for AKS (if not already enabled)",
+      "az aks enable-addons --resource-group {{RG_NAME}} --name {{resource}} \\",
+      "  --addons azure-policy",
+      "",
+      "# Step 2: Look up the built-in initiative ID by name (never hardcode a policy",
+      "# GUID - verify it resolves before assigning) and assign it to the cluster.",
+      "# Use the 'restricted' initiative for the strictest baseline, or swap in",
+      "# 'Kubernetes cluster pod security baseline standards for Linux-based workloads'",
+      "# for a lighter starting point.",
+      "POLICY_SET_ID=$(az policy set-definition list \\",
+      "  --query \"[?displayName=='Kubernetes cluster pod security restricted standards for Linux-based workloads'].id\" \\",
+      "  -o tsv)",
+      "az policy assignment create \\",
+      "  --name \"aks-pod-security-restricted\" \\",
+      "  --policy-set-definition \"$POLICY_SET_ID\" \\",
+      "  --scope /subscriptions/{{SUBSCRIPTION_ID}}/resourceGroups/{{RG_NAME}}/providers/Microsoft.ContainerService/managedClusters/{{resource}}",
+      "",
+      "# Step 3 (alternative/complementary): enforce Pod Security Admission at the",
+      "# namespace level - built into Kubernetes, no add-on required",
+      "kubectl label namespace {{NAMESPACE}} \\",
+      "  pod-security.kubernetes.io/enforce=restricted \\",
+      "  pod-security.kubernetes.io/enforce-version=latest --overwrite",
+      "",
+      "# Step 4: Audit and patch any existing privileged workload",
+      "kubectl get pods --all-namespaces -o json | \\",
+      "  jq -r '.items[] | select(.spec.containers[]?.securityContext?.privileged==true) | \"\\(.metadata.namespace)/\\(.metadata.name)\"'",
+      "kubectl patch deployment {{WORKLOAD_NAME}} -n {{NAMESPACE}} --type=json -p \\",
+      "  '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/securityContext/privileged\",\"value\":false}]'",
+      "",
+      "# Step 5: Verify the policy assignment is compliant",
+      "az policy state list --resource {{resource}} --filter \"policyAssignmentName eq 'aks-pod-security-restricted'\""
+    ]
+  },
+  "PRIVILEGED_WORKLOAD|GCP": {
+    "title": "Restrict Privileged Containers on GKE",
+    "description": "Blocks privileged/host-escaping pod specs via Pod Security Admission (PodSecurityPolicy is removed in GKE 1.25+, so PSA is the current mechanism) and Policy Controller for org-wide enforcement, then remediates existing workloads.",
+    "commands": [
+      "# Step 1: Enforce Pod Security Admission at the namespace level (built into",
+      "# Kubernetes 1.23+ / all current GKE versions - PodSecurityPolicy itself was",
+      "# removed from Kubernetes in 1.25 and is no longer available to enable)",
+      "kubectl label namespace {{NAMESPACE}} \\",
+      "  pod-security.kubernetes.io/enforce=restricted \\",
+      "  pod-security.kubernetes.io/enforce-version=latest --overwrite",
+      "",
+      "# Step 2 (optional, org-wide): enable Policy Controller for centrally-managed,",
+      "# auditable constraints across all clusters via Anthos Config Management",
+      "gcloud container fleet policycontroller enable --project {{PROJECT_ID}}",
+      "",
+      "# Step 3: Audit existing workloads for privileged containers",
+      "kubectl get pods --all-namespaces -o json | \\",
+      "  jq -r '.items[] | select(.spec.containers[]?.securityContext?.privileged==true) | \"\\(.metadata.namespace)/\\(.metadata.name)\"'",
+      "",
+      "# Step 4: Patch a flagged workload's securityContext",
+      "kubectl patch deployment {{WORKLOAD_NAME}} -n {{NAMESPACE}} --type=json -p \\",
+      "  '[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/securityContext/privileged\",\"value\":false}]'",
+      "",
+      "# Step 5: Verify no privileged pods remain",
+      "kubectl get pods --all-namespaces -o json | \\",
+      "  jq '[.items[] | select(.spec.containers[]?.securityContext?.privileged==true)] | length'"
+    ]
+  },
+  "PRIVILEGED_ECS_TASK|AWS": {
+    "title": "Remove Privileged Mode from ECS Task Definition",
+    "description": "ECS task definitions are not Kubernetes pods - there is no kubectl/cluster admission control here. Fix requires registering a new task-definition revision with privileged mode disabled and no host bind-mounts, then rolling the service onto it.",
+    "commands": [
+      "# Step 1: Fetch the current (vulnerable) task definition",
+      "aws ecs describe-task-definition --task-definition {{resource}} \\",
+      "  --query 'taskDefinition' > current-task-def.json",
+      "",
+      "# Step 2: Edit current-task-def.json - set containerDefinitions[].privileged",
+      "# to false and remove any host-path mountPoints/volumes that allow host",
+      "# filesystem access. This edit must be authored by the reviewer.",
+      "",
+      "# Step 3: Register the corrected definition as a new revision",
+      "aws ecs register-task-definition --cli-input-json file://current-task-def.json",
+      "",
+      "# Step 4: Update the service to use the new (non-privileged) revision",
+      "aws ecs update-service --cluster {{ECS_CLUSTER_NAME}} \\",
+      "  --service {{ECS_SERVICE_NAME}} \\",
+      "  --task-definition {{resource}}:{{NEW_REVISION_NUMBER}}",
+      "",
+      "# Step 5: Verify no running task uses the old privileged revision",
+      "aws ecs list-tasks --cluster {{ECS_CLUSTER_NAME}} --service-name {{ECS_SERVICE_NAME}} \\",
+      "  --query 'taskArns' --output text | \\",
+      "  xargs -I{} aws ecs describe-tasks --cluster {{ECS_CLUSTER_NAME}} --tasks {} \\",
+      "  --query 'tasks[].taskDefinitionArn'"
+    ]
+  }
+}

@@ -1,0 +1,550 @@
+{
+  "cache_max_age_days": 90,
+  "entries": {
+    "aws accessanalyzer create-analyzer": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'accessanalyzer'",
+      "provider": "AWS",
+      "signature": "aws accessanalyzer create-analyzer",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws accessanalyzer list-findings": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'accessanalyzer'",
+      "provider": "AWS",
+      "signature": "aws accessanalyzer list-findings",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws apigateway update-method": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'apigateway'",
+      "provider": "AWS",
+      "signature": "aws apigateway update-method",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws apigateway update-rest-api": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'apigateway'",
+      "provider": "AWS",
+      "signature": "aws apigateway update-rest-api",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws apigateway update-stage": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'apigateway'",
+      "provider": "AWS",
+      "signature": "aws apigateway update-stage",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws autoscaling put-scaling-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'autoscaling'",
+      "provider": "AWS",
+      "signature": "aws autoscaling put-scaling-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws backup create-backup-plan": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'backup'",
+      "provider": "AWS",
+      "signature": "aws backup create-backup-plan",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cloudfront create-distribution": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cloudfront'",
+      "provider": "AWS",
+      "signature": "aws cloudfront create-distribution",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cloudtrail create-trail": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cloudtrail'",
+      "provider": "AWS",
+      "signature": "aws cloudtrail create-trail",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cloudtrail get-trail-status": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cloudtrail'",
+      "provider": "AWS",
+      "signature": "aws cloudtrail get-trail-status",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cloudtrail lookup-events": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cloudtrail'",
+      "provider": "AWS",
+      "signature": "aws cloudtrail lookup-events",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cloudtrail start-logging": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cloudtrail'",
+      "provider": "AWS",
+      "signature": "aws cloudtrail start-logging",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cognito-idp admin-user-global-sign-out": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cognito-idp'",
+      "provider": "AWS",
+      "signature": "aws cognito-idp admin-user-global-sign-out",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws cognito-idp update-user-pool-client": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'cognito-idp'",
+      "provider": "AWS",
+      "signature": "aws cognito-idp update-user-pool-client",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 authorize-security-group-ingress": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 authorize-security-group-ingress",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 create-flow-logs": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 create-flow-logs",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 create-key-pair": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 create-key-pair",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 describe-iam-instance-profile-associations": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 describe-iam-instance-profile-associations",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 describe-security-groups": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 describe-security-groups",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 modify-instance-metadata-options": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 modify-instance-metadata-options",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ec2 revoke-security-group-ingress": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ec2'",
+      "provider": "AWS",
+      "signature": "aws ec2 revoke-security-group-ingress",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws eks update-cluster-config": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'eks'",
+      "provider": "AWS",
+      "signature": "aws eks update-cluster-config",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws guardduty create-detector": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'guardduty'",
+      "provider": "AWS",
+      "signature": "aws guardduty create-detector",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam create-policy-version": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam create-policy-version",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam delete-access-key": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam delete-access-key",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam delete-policy-version": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam delete-policy-version",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam generate-credential-report": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam generate-credential-report",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam get-account-summary": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam get-account-summary",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam get-credential-report": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam get-credential-report",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam get-policy-version": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam get-policy-version",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam list-access-keys": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam list-access-keys",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam list-entities-for-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam list-entities-for-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam list-policies": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam list-policies",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam list-users": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam list-users",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam update-access-key": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam update-access-key",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam update-account-password-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam update-account-password-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws iam update-role": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'iam'",
+      "provider": "AWS",
+      "signature": "aws iam update-role",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws kms enable-key-rotation": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'kms'",
+      "provider": "AWS",
+      "signature": "aws kms enable-key-rotation",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws kms get-key-rotation-status": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'kms'",
+      "provider": "AWS",
+      "signature": "aws kms get-key-rotation-status",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws lambda get-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'lambda'",
+      "provider": "AWS",
+      "signature": "aws lambda get-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws lambda put-function-code-signing-config": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'lambda'",
+      "provider": "AWS",
+      "signature": "aws lambda put-function-code-signing-config",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws lambda update-function-configuration": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'lambda'",
+      "provider": "AWS",
+      "signature": "aws lambda update-function-configuration",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws macie2 create-classification-job": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'macie2'",
+      "provider": "AWS",
+      "signature": "aws macie2 create-classification-job",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws macie2 enable-macie": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'macie2'",
+      "provider": "AWS",
+      "signature": "aws macie2 enable-macie",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws organizations create-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'organizations'",
+      "provider": "AWS",
+      "signature": "aws organizations create-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws rds create-db-snapshot": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'rds'",
+      "provider": "AWS",
+      "signature": "aws rds create-db-snapshot",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws rds describe-db-instances": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'rds'",
+      "provider": "AWS",
+      "signature": "aws rds describe-db-instances",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws rds modify-db-instance": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'rds'",
+      "provider": "AWS",
+      "signature": "aws rds modify-db-instance",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws route53 change-resource-record-sets": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'route53'",
+      "provider": "AWS",
+      "signature": "aws route53 change-resource-record-sets",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws route53 enable-hosted-zone-dnssec": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'route53'",
+      "provider": "AWS",
+      "signature": "aws route53 enable-hosted-zone-dnssec",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws route53domains enable-domain-transfer-lock": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'route53domains'",
+      "provider": "AWS",
+      "signature": "aws route53domains enable-domain-transfer-lock",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api get-bucket-encryption": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api get-bucket-encryption",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api get-public-access-block": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api get-public-access-block",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-bucket-encryption": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-bucket-encryption",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-bucket-lifecycle-configuration": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-bucket-lifecycle-configuration",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-bucket-logging": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-bucket-logging",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-bucket-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-bucket-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-bucket-versioning": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-bucket-versioning",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3api put-public-access-block": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3api'",
+      "provider": "AWS",
+      "signature": "aws s3api put-public-access-block",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws s3control put-public-access-block": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 's3control'",
+      "provider": "AWS",
+      "signature": "aws s3control put-public-access-block",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws secretsmanager create-secret": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'secretsmanager'",
+      "provider": "AWS",
+      "signature": "aws secretsmanager create-secret",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws secretsmanager get-resource-policy": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'secretsmanager'",
+      "provider": "AWS",
+      "signature": "aws secretsmanager get-resource-policy",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws secretsmanager put-rotation-configuration": {
+      "checked_on": "2026-08-23T18:51:54+00:00",
+      "detail": "'put-rotation-configuration' not an operation of 'secretsmanager'; similar: put-resource-policy, put-secret-value",
+      "provider": "AWS",
+      "signature": "aws secretsmanager put-rotation-configuration",
+      "source": "botocore service model (offline)",
+      "status": "not_found"
+    },
+    "aws secretsmanager rotate-secret": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'secretsmanager'",
+      "provider": "AWS",
+      "signature": "aws secretsmanager rotate-secret",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws shield describe-subscription": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'shield'",
+      "provider": "AWS",
+      "signature": "aws shield describe-subscription",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws ssm send-command": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'ssm'",
+      "provider": "AWS",
+      "signature": "aws ssm send-command",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws wafv2 associate-web-acl": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'wafv2'",
+      "provider": "AWS",
+      "signature": "aws wafv2 associate-web-acl",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    },
+    "aws wafv2 create-web-acl": {
+      "checked_on": "2026-08-23T18:53:11+00:00",
+      "detail": "found in botocore model for 'wafv2'",
+      "provider": "AWS",
+      "signature": "aws wafv2 create-web-acl",
+      "source": "botocore service model (offline)",
+      "status": "verified"
+    }
+  },
+  "generated": "2026-08-23T18:53:11+00:00"
+}

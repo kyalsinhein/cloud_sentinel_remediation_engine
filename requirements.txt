@@ -1,0 +1,4 @@
+pandas>=2.0
+streamlit>=1.30
+cvss>=3.0
+pytest>=8.0
