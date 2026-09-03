@@ -8,6 +8,7 @@ live environment — every generated script is explicitly for review, and
 every CLI command in the template library is checked against the relevant
 provider's official documentation before being trusted.
 
+Online Demo : https://cloudsentinelremediationengine-57tvbxmbeq4qlp5yvmp4gs.streamlit.app/
 
 ## Pipeline
 
