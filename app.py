@@ -419,10 +419,8 @@ if step == 0:
                 st.dataframe(flagged[cols], use_container_width=True, hide_index=True)
         st.stop()
 
-    if done_flags[0]:
-    st.caption("Loaded {} in-scope records (AWS / Azure / GCP only).".format(len(st.session_state.df)))
-    else:
-    st.caption("Loads all in-scope records (AWS / Azure / GCP only).")
+    st.caption("Loads all in-scope records (AWS / Azure / GCP only). "
+           "Use **Load & Clean from Dataset File** in the action bar above or the sidebar.")
 
     if report:
         _render_cleaning_report(report)
